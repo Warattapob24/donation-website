@@ -233,13 +233,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // เมื่อกดปุ่ม "ดาวน์โหลด PDF" (ยังไม่สมบูรณ์)
-    downloadPdfBtn.addEventListener('click', () => {
+    downloadPdfBtn.addEventListener('click', async () => { // เปลี่ยนเป็น async เพื่อรอรูปภาพโหลด
         Swal.fire({
-            icon: 'info',
-            title: 'ฟังก์ชันนี้กำลังพัฒนา',
-            text: 'การดาวน์โหลดเป็น PDF จะพร้อมใช้งานในเร็วๆ นี้',
-            confirmButtonText: 'ตกลง'
+            title: 'กำลังสร้าง PDF...',
+            text: 'กรุณารอสักครู่',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
+
+        const dataURL = certificateCanvas.toDataURL('image/png'); // ได้ base64 ของรูปภาพจาก canvas
+
+        // สร้าง Object Image เพื่อให้ jsPDF ใช้งานได้
+        const img = new Image();
+        img.src = dataURL;
+
+        img.onload = () => {
+            const { jsPDF } = window.jspdf; // เรียกใช้ jsPDF
+            const doc = new jsPDF('landscape', 'px', 'a4'); // กำหนดขนาด A4 แนวนอน
+
+            const imgWidth = doc.internal.pageSize.getWidth();
+            const imgHeight = (img.height * imgWidth) / img.width; // คำนวณความสูงให้ได้อัตราส่วนเดิม
+
+            doc.addImage(img, 'PNG', 0, 0, imgWidth, imgHeight); // เพิ่มรูปภาพลงใน PDF
+            doc.save('เกียรติบัตร_ร่วมทำบุญ.pdf'); // ดาวน์โหลดไฟล์ PDF
+
+            Swal.close(); // ปิด Loading Spinner
+        };
+
+        img.onerror = (error) => {
+            console.error("Error loading image for PDF:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด!',
+                text: 'ไม่สามารถสร้าง PDF ได้: ' + error.message,
+                confirmButtonText: 'ตกลง'
+            });
+        };
     });
 
     // เมื่อกดปุ่ม "พิมพ์"
