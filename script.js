@@ -109,17 +109,78 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // 3. จัดการเหตุการณ์ (Event Handlers)
+    // *** ฟังก์ชันเพื่อโหลดข้อมูลจาก Google Sheet เมื่อหน้าเว็บโหลด ***
+    async function loadDonationsFromSheet() {
+        try {
+            // แสดง Loading Spinner ขณะโหลดข้อมูล
+            Swal.fire({
+                title: 'กำลังโหลดข้อมูลบริจาค...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-    // เมื่อกดปุ่ม "บริจาค" ในฟอร์ม
+            const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                method: 'GET' // ใช้ GET เพื่อดึงข้อมูล
+            });
+
+            const result = await response.json();
+            Swal.close(); // ปิด Loading Spinner
+
+            if (result && result.data) {
+                // *** สำคัญ: ปรับการแมปข้อมูลตรงนี้ ให้ตรงกับชื่อคอลัมน์ใน Google Sheet ของคุณ ***
+                // ถ้าคุณใช้ชื่อคอลัมน์ใน Google Sheet เป็นภาษาอังกฤษ (FullName, Province, Amount, Date)
+                donations = result.data.map(item => ({
+                    name: item.FullName,  // ตรงกับ FullName ใน Sheet
+                    province: item.Province, // ตรงกับ Province ใน Sheet
+                    amount: parseInt(item.Amount), // แปลงเป็นตัวเลข
+                    date: item.Date        // ตรงกับ Date ใน Sheet
+                }));
+
+                // ถ้าคุณใช้ชื่อคอลัมน์ใน Google Sheet เป็นภาษาไทย (เช่น 'ชื่อ - นามสกุล', 'จังหวัด', 'จำนวนเงินบริจาค', 'วันที่บริจาค')
+                // ให้ใช้โค้ดนี้แทนโค้ดด้านบน แล้วคอมเมนต์โค้ดด้านบน
+                /*
+                donations = result.data.map(item => ({
+                    name: item.ชื่อนามสกุล,  // 'ชื่อ - นามสกุล' ถูก Apps Script แปลงเป็น 'ชื่อนามสกุล'
+                    province: item.จังหวัด,   // 'จังหวัด' ถูก Apps Script แปลงเป็น 'จังหวัด'
+                    amount: parseInt(item.จำนวนเงินบริจาค), // 'จำนวนเงินบริจาค' ถูก Apps Script แปลงเป็น 'จำนวนเงินบริจาค'
+                    date: item.วันที่บริจาค   // 'วันที่บริจาค' ถูก Apps Script แปลงเป็น 'วันที่บริจาค'
+                }));
+                */
+
+                updateTotalAmount();
+                renderDonorsTable();
+            } else {
+                console.error("Failed to load donations: ", result.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'โหลดข้อมูลไม่สำเร็จ',
+                    text: result.message || 'ไม่สามารถดึงข้อมูลผู้บริจาคได้',
+                    confirmButtonText: 'ตกลง'
+                });
+            }
+        } catch (error) {
+            console.error("Error loading donations from sheet:", error);
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'ข้อผิดพลาดในการเชื่อมต่อ',
+                text: 'ไม่สามารถโหลดข้อมูลบริจาคได้ โปรดตรวจสอบการเชื่อมต่อ',
+                confirmButtonText: 'ตกลง'
+            });
+        }
+    }
+
+    // 3. จัดการเหตุการณ์ (Event Handlers)
     donateForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // หยุดการโหลดหน้าใหม่
+        e.preventDefault();
 
         const fullName = document.getElementById('fullName').value.trim();
         const province = document.getElementById('province').value.trim();
         const amount = parseInt(document.getElementById('amount').value);
 
-        // ตรวจสอบข้อมูลว่ากรอกครบถ้วนและถูกต้องหรือไม่
         if (!fullName || !province || isNaN(amount) || amount <= 0) {
             Swal.fire({
                 icon: 'error',
@@ -127,30 +188,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง',
                 confirmButtonText: 'รับทราบ'
             });
-            return; // หยุดการทำงานถ้าข้อมูลไม่ถูกต้อง
+            return;
         }
 
-        // กำหนดวันที่ปัจจุบันในรูปแบบไทย
         const today = new Date();
         const formattedDate = `${today.getDate()} ${new Intl.DateTimeFormat('th-TH', { month: 'long', year: 'numeric' }).format(today)}`;
 
-        // สร้างข้อมูลการบริจาคใหม่สำหรับแสดงผลในตารางชั่วคราว
-        const newDonation = {
+        const newDonation = { // ข้อมูลสำหรับแสดงผลในตารางชั่วคราวบนเว็บทันที (อาจจะไม่ใช้แล้วถ้าโหลดจาก Sheet ตลอด)
             name: fullName,
             province: province,
             amount: amount,
             date: formattedDate
         };
 
-        // *** ส่วนนี้คือการส่งข้อมูลไปยัง Google Sheet ***
-        const formData = new FormData();
+        const formData = new FormData(); // ข้อมูลสำหรับส่งไป Google Sheet
         formData.append('FullName', fullName); // ชื่อคอลัมน์ใน Sheet (ตรงกับที่ตั้งใน Google Sheet)
-        formData.append('Province', province); // ชื่อคอลัมน์ใน Sheet
-        formData.append('Amount', amount);     // ชื่อคอลัมน์ใน Sheet
-        formData.append('Date', formattedDate); // ชื่อคอลัมน์ใน Sheet
+        formData.append('Province', province);
+        formData.append('Amount', amount);
+        formData.append('Date', formattedDate);
 
         try {
-            // แสดง Loading Spinner ขณะส่งข้อมูล
             Swal.fire({
                 title: 'กำลังส่งข้อมูล...',
                 text: 'กรุณารอสักครู่',
@@ -160,23 +217,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // ส่งข้อมูลไปยัง Web App URL ของ Google Apps Script
             const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
                 method: 'POST',
                 body: formData
             });
 
-            const data = await response.json(); // แปลงผลลัพธ์จากเซิร์ฟเวอร์เป็น JSON
+            const data = await response.json();
 
             if (data.result === 'success') {
                 // ถ้าส่งข้อมูลสำเร็จ
-                donations.push(newDonation); // เพิ่มข้อมูลเข้า Array (เพื่อแสดงในตารางหน้าเว็บชั่วคราว)
-                updateTotalAmount(); // อัปเดตยอดรวม
-                renderDonorsTable(); // อัปเดตตารางผู้บริจาค
-                drawCertificate(fullName, amount, formattedDate); // วาดเกียรติบัตร
-                certificateModal.style.display = 'block'; // แสดง Modal เกียรติบัตร
+                // หลังจากส่งสำเร็จ ค่อยโหลดข้อมูลทั้งหมดใหม่จาก Sheet
+                // เพื่อให้มั่นใจว่าข้อมูลในตารางหน้าเว็บตรงกับใน Sheet
+                await loadDonationsFromSheet(); // โหลดข้อมูลล่าสุดทั้งหมด
 
-                // แสดง SweetAlert2 แจ้งเตือนความสำเร็จและคำแนะนำ
+                drawCertificate(fullName, amount, formattedDate);
+                certificateModal.style.display = 'block';
+
                 await Swal.fire({
                     icon: 'success',
                     title: 'ขอบคุณสำหรับการบริจาค!',
@@ -190,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 donateForm.reset(); // ล้างข้อมูลในฟอร์ม
             } else {
-                // ถ้ามีข้อผิดพลาดจากการบันทึกข้อมูล (จาก Apps Script)
                 Swal.fire({
                     icon: 'error',
                     title: 'เกิดข้อผิดพลาด!',
@@ -199,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
-            // ถ้าเกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย
             Swal.fire({
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาดในการเชื่อมต่อ!',
@@ -209,19 +263,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // เมื่อกดปุ่มปิด Modal เกียรติบัตร
     closeButton.addEventListener('click', () => {
         certificateModal.style.display = 'none';
     });
 
-    // เมื่อคลิกนอก Modal เกียรติบัตร (เพื่อปิด)
     window.addEventListener('click', (event) => {
         if (event.target == certificateModal) {
             certificateModal.style.display = 'none';
         }
     });
 
-    // เมื่อกดปุ่ม "ดาวน์โหลด PNG"
     downloadPngBtn.addEventListener('click', () => {
         const dataURL = certificateCanvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -232,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(link);
     });
 
-    // เมื่อกดปุ่ม "ดาวน์โหลด PDF" (ยังไม่สมบูรณ์)
     downloadPdfBtn.addEventListener('click', async () => { // เปลี่ยนเป็น async เพื่อรอรูปภาพโหลด
         Swal.fire({
             title: 'กำลังสร้าง PDF...',
