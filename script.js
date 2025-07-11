@@ -5,10 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         once: true,
     });
 
-    let donations = [
-        // สามารถใส่ข้อมูลบริจาคเริ่มต้นได้ที่นี่ (ถ้ามี)
-        // { name: 'คุณสมศักดิ์ ใจดี', province: 'กรุงเทพมหานคร', amount: 500, date: '11 กรกฎาคม 2568' },
-    ];
+    let donations = []; // เริ่มต้นด้วย Array ว่างเปล่า จะไปโหลดมาจาก Google Sheet แทน
 
     const totalAmountSpan = document.getElementById('totalAmount');
     const donateForm = document.getElementById('donateForm');
@@ -19,10 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadPngBtn = document.getElementById('downloadPng');
     const downloadPdfBtn = document.getElementById('downloadPdf');
     const printCertBtn = document.getElementById('printCert');
-    const sendSlipLineBtn = document.getElementById('sendSlipLine'); // เพิ่มตัวแปรสำหรับปุ่มส่งสลิป LINE
+    const sendSlipLineBtn = document.getElementById('sendSlipLine');
 
     // *** URL ของ Web App ที่ได้จาก Google Apps Script ***
-    // สำคัญ: ต้องเปลี่ยน 'YOUR_WEB_APP_URL_FROM_APPS_SCRIPT' เป็น URL จริงที่คุณได้จาก Apps Script
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJ9Lph3QjJjx1KJA9l4SJdHKdxHM0JV-J9uHas9bMGgzSNiR1odQgqaZqeKEMiuynX/exec'; 
 
     // 2. ฟังก์ชันช่วยงาน (Helper Functions)
@@ -273,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // เมื่อกดปุ่ม "ดาวน์โหลด PNG"
     downloadPngBtn.addEventListener('click', () => {
         const dataURL = certificateCanvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -283,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(link);
     });
 
+    // เมื่อกดปุ่ม "ดาวน์โหลด PDF" (ยังไม่สมบูรณ์)
     downloadPdfBtn.addEventListener('click', async () => { // เปลี่ยนเป็น async เพื่อรอรูปภาพโหลด
         Swal.fire({
             title: 'กำลังสร้าง PDF...',
@@ -362,6 +360,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 5. เรียกใช้งานฟังก์ชันเริ่มต้นเมื่อโหลดหน้า
-    updateTotalAmount();
-    renderDonorsTable();
+    // *** จุดที่ต้องแก้ไข ***
+    // ต้องเรียก loadDonationsFromSheet() ที่นี่ เพื่อให้โหลดข้อมูลเมื่อหน้าเว็บเปิด
+    loadDonationsFromSheet(); // <--- ต้องเป็นบรรทัดนี้แทน
+    // updateTotalAmount(); // บรรทัดนี้จะถูกเรียกใน loadDonationsFromSheet()
+    // renderDonorsTable(); // บรรทัดนี้จะถูกเรียกใน loadDonationsFromSheet()
 });
