@@ -360,9 +360,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 5. เรียกใช้งานฟังก์ชันเริ่มต้นเมื่อโหลดหน้า
-    // *** จุดที่ต้องแก้ไข ***
-    // ต้องเรียก loadDonationsFromSheet() ที่นี่ เพื่อให้โหลดข้อมูลเมื่อหน้าเว็บเปิด
-    loadDonationsFromSheet(); // <--- ต้องเป็นบรรทัดนี้แทน
-    // updateTotalAmount(); // บรรทัดนี้จะถูกเรียกใน loadDonationsFromSheet()
-    // renderDonorsTable(); // บรรทัดนี้จะถูกเรียกใน loadDonationsFromSheet()
+    loadDonationsFromSheet();
 });
