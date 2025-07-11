@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendSlipLineBtn = document.getElementById('sendSlipLine');
 
     // *** URL ของ Web App ที่ได้จาก Google Apps Script ***
-    const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJ9Lph3QjJjx1KJA9l4SJdHKdxHM0JV-J9uHas9bMGgzSNiR1odQgqaZqeKEMiuynX/exec'; 
+    const GOOGLE_SHEET_WEB_APP_URL ='https://script.google.com/macros/s/AKfycbzJ9Lph3QjJjx1KJA9l4SJdHKdxHM0JV-J9uHas9bMGgzSNiR1odQgqaZqeKEMiuynX/exec'; 
 
     // 2. ฟังก์ชันช่วยงาน (Helper Functions)
     // ฟังก์ชันสำหรับจัดรูปแบบวันที่ให้เป็น "วัน เดือน ปี" ภาษาไทย
