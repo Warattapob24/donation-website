@@ -287,3 +287,43 @@ footer {
 #sendSlipLine:hover {
     background-color: #05a847; /* Darker LINE Green on hover */
 }
+
+/* ... โค้ด CSS เดิม ... */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-text {
+        font-size: 1.2em;
+    }
+    .image-wrapper {
+        width: 100%; /* ทำให้ภาพกินพื้นที่ 100% ของคอนเทนเนอร์บนมือถือ */
+        height: auto;
+    }
+    .activity-images {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px; /* ลดระยะห่างระหว่างภาพบนมือถือ */
+    }
+    .donation-form, .donors-list {
+        padding: 15px;
+        margin: 20px auto; /* เพิ่ม margin บนล่างเล็กน้อย */
+    }
+    
+    /* *** สำคัญ: ทำให้ตารางสามารถเลื่อนได้ในแนวนอนบนมือถือ *** */
+    .donors-list {
+        overflow-x: auto; /* ทำให้เนื้อหาแนวนอนเลื่อนได้ */
+        -webkit-overflow-scrolling: touch; /* เพื่อการเลื่อนที่สมูทบน iOS */
+    }
+
+    #donorsTable {
+        font-size: 0.9em; /* ลดขนาดฟอนต์ในตาราง */
+        min-width: 500px; /* กำหนดความกว้างขั้นต่ำ เพื่อให้ DataTables ทำงานได้ดีและป้องกันการบีบอัดมากเกินไป */
+    }
+    #donorsTable th, #donorsTable td {
+        padding: 8px;
+    }
+    
+    .school-logo {
+        width: 120px; /* ปรับขนาดโลโก้ให้เล็กลงบนมือถือ */
+    }
+}
