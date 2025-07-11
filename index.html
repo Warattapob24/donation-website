@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ร่วมทำบุญสมทบทุนจัดซื้อ ป้ายวง และธง วงเมโลเดียน</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;700&family=Sarabun:wght@300;400;700&family=TH+Chakra+Petch:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="gradient-background">
+    <header class="animate__animated animate__fadeInDown">
+        <div class="logo-container">
+            <img src="https://img5.pic.in.th/file/secure-sv1/22e3edfc06474f56734531af2780e6fb.jpg" alt="ตราสัญลักษณ์โรงเรียนบ้านกุดขมิ้น" class="school-logo">
+        </div>
+        <h1 class="header-text">ขอเชิญร่วมทำบุญสมทบทุนจัดซื้อ ป้ายวง และธง ให้กับวงเมโลเดียน</h1>
+        <p class="header-text">โรงเรียนบ้านกุดขมิ้น อ.สูงเนิน จ.นครราชสีมา</p>
+        <p class="header-text">หมายเลขบัญชี 200-2-92830-5 กสิกรไทย นายอดุลย์ เปลื้องสันเทียะ</p>
+    </header>
+    </div>
+
+    <main>
+        <section class="activity-images">
+            <div class="image-wrapper animate__animated animate__fadeInUp">
+                <img src="https://img5.pic.in.th/file/secure-sv1/1a064ed4077252f64.jpg" alt="ภาพกิจกรรม 1" class="activity-img">
+                <div class="halo-effect"></div>
+            </div>
+            <div class="image-wrapper animate__animated animate__fadeInUp">
+                <img src="https://img2.pic.in.th/pic/2f89af690f32207c3.jpg" alt="ภาพกิจกรรม 2" class="activity-img">
+                <div class="halo-effect"></div>
+            </div>
+        </section>
+
+        <section class="donation-form animate__animated animate__fadeInUp">
+            <h2>ร่วมลงชื่อบริจาค</h2>
+            <form id="donateForm">
+                <label for="fullName">ชื่อ - นามสกุล:</label>
+                <input type="text" id="fullName" name="fullName" required>
+
+                <label for="province">จังหวัด:</label>
+                <input type="text" id="province" name="province" list="provinceList">
+                <datalist id="provinceList">
+                    </datalist>
+
+                <label for="amount">จำนวนเงินบริจาค:</label>
+                <input type="number" id="amount" name="amount" min="1" required>
+
+                <button type="submit" id="donateButton" class="animate__animated animate__pulse animate__infinite">บริจาค</button>
+            </form>
+            <p class="total-donations">ยอดรวมบริจาค: <span id="totalAmount">0</span> บาท</p>
+        </section>
+
+        <section class="donors-list animate__animated animate__fadeInUp">
+            <h2>รายชื่อผู้บริจาคล่าสุด</h2>
+            <table id="donorsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>ลำดับ</th>
+                        <th>ชื่อ - นามสกุล</th>
+                        <th>จังหวัด</th>
+                        <th>จำนวนเงิน</th>
+                        <th>วันที่บริจาค</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 by WARATTPOB</p>
+    </footer>
+
+    <div id="certificateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3>เกียรติบัตรขอขอบคุณ</h3>
+            <canvas id="certificateCanvas"></canvas>
+            <div class="certificate-actions">
+                <button id="downloadPng">ดาวน์โหลด PNG</button>
+                <button id="downloadPdf">ดาวน์โหลด PDF</button>
+                <button id="printCert">พิมพ์</button>
+                <button id="sendSlipLine">ส่งสลิปผ่าน LINE</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

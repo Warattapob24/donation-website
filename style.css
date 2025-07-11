@@ -1,0 +1,289 @@
+body {
+    font-family: 'Prompt', 'Sarabun', 'TH Chakra Petch', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    text-align: center;
+    overflow-x: hidden; /* Prevent horizontal scroll from animations */
+    background-color: #FFFACD; /* ตั้งค่าสีพื้นหลังเริ่มต้นสำหรับส่วนที่เหลือของหน้า */
+}
+
+/* เพิ่ม CSS สำหรับ div ที่ครอบส่วนหัว เพื่อให้มีพื้นหลังไล่เฉด */
+.gradient-background {
+    background: linear-gradient(to bottom, #FFD700, #FFEA00, #FFFACD); /* Yellow Gold, White Gold, Cream */
+    background-repeat: no-repeat;
+    background-attachment: scroll; /* Allow scrolling */
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMuorg/2000/svgIj4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogICAgPHBhdGggZD0iTTMwIDEwYzguMjg0IDAgMTUgNi43MTYgMTUgMTVTMTUuMjgyIDQwIDMwIDQwIDI2LjQxOCAzNy42NjkgMzAgMzUgMzUuNzUgMzcgNDAgMzVjNS41MjMgMCAxMC00LjQ3NyAxMC0xMFM0NS41MjMgMTQgNDAgMTRWMTAuNzcxQzQwIDEwLjMyMyAzOS42NzcgMTAgMzkuMjUxIDEwSDMwVjEwWiIgZmlsbD0iI0ZGQ0QwMCIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KICAgIDxwYXRoIGQ9Ik0zMCAzMWM4LjI4NCAwIDE1IDYuNzE2IDE1IDE1czYuNzE2IDE1IDE1IDMwdjEwYzAgOC4yODQtNi43MTYgMTUtMTUgMTVzLTcuNTc5LTEuMzMtMTUtOC44MjNWNTBjMCA0LjQxOCAzLjU4MiA4IDggOHMyLjQ1Mi0uMzAzIDUtLjU2VjI5LjIyMWMtNC40OTYgMC04LjIwNi0xLjczNC0xMC00LjI5Mi0xLjcyLTUuNDc4LS45ODItMTMuOTE3IDUtMTguMTY4VjEzLjIyMWMtNC40OTYgMC04LjIwNi0xLjczNC0xMC00LjI5MkMxNS45MzIgMy40NTIgMTcuMTU5Ljg5NyAyMi0uMTY4VjE1YzAtNC40MTgtMy41ODItOC04LThTOCA4IDggOHYtMi4xNDJDOC00LjQwMiA5Ljc2MS02IDExLjAyNS02LjQ4NmMtLjM1NS4wNDYtLjY1LjE4LTEuMzU1LjQ4NmMtNS41MjMgMC0xMC00LjQ3Ny0xMC0xMFMwIDIwIDIwIDIwVjEwYzAtNS41MjMtNC40NzctMTAtMTAtMTBzLTQgMS41MjMtNC40NzctMi44MjZWMTBjMC00LjQxOCAzLjU4Mi04IDgtOHM4IDMuNTgyIDggOC0zLjU4MiA4LTggOHYtMy43MzJDMTUgMTUgMTQuNDc3IDE1IDEwIDE1czUtNC40NzcgNS0xMFMwIDUgMTAgNSAxLjA1NyAxLjA2NSAzLjAwMiAzLjU0MmMtLjM1NS4wNDYtLjY1LjE4LTEuMzU1LjQ4NmMtNS41MjMgMC0xMC00LjQ3Ny0xMC0xMFMwIDI1IDI1IDI1VjMwYzAtNS41MjMtNC40NzctMTAtMTAtMTBTMCAyMDIwIDIwVjIwWiIgZmlsbD0iI0ZGQ0QwMCIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KICA8L2c+Cjwvc3ZnPg==');
+    background-size: 60px 60px; /* ขนาดของลวดลาย */
+    width: 100%; /* ครอบคลุมความกว้างทั้งหมด */
+    padding-bottom: 30px; /* เพิ่ม padding ด้านล่างเล็กน้อย เพื่อให้ gradient ดูสมบูรณ์ */
+}
+
+header {
+    padding: 20px;
+    margin-bottom: 0; /* ไม่ต้องมี margin-bottom แล้ว เพราะ gradient-background จัดการพื้นที่ */
+    position: relative;
+    z-index: 1; /* z-index นี้ควรจะสูงกว่า background ของ gradient-background */
+}
+
+.school-logo {
+    width: 150px;
+    height: auto;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2; /* ให้โลโก้อยู่บนสุด */
+}
+
+.header-text {
+    margin: 5px 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #2C3E50; /* สีกรมท่าเข้ม */
+    position: relative;
+    z-index: 2; /* ให้ข้อความอยู่บนสุด */
+}
+
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Activity Images */
+.activity-images {
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* Space between images */
+    flex-wrap: wrap; /* Allow images to wrap on smaller screens */
+    margin-bottom: 40px;
+}
+
+.image-wrapper {
+    position: relative;
+    border: 5px solid transparent; /* Placeholder for golden border/frame */
+    border-image: linear-gradient(to bottom, #FFD700, #DAA520) 1; /* Example golden gradient border */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Ensures halo stays within bounds */
+    width: 300px; /* Adjust size as needed */
+    height: 200px;
+}
+
+.activity-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover; /* Ensures image covers the area */
+}
+
+.halo-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%; /* Larger than image to create effect */
+    height: 120%;
+    background: radial-gradient(circle, rgba(255, 228, 75, 0.5) 0%, rgba(255, 215, 0, 0) 50%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse-halo 3s infinite alternate;
+    pointer-events: none; /* Allows clicks to pass through */
+}
+
+@keyframes pulse-halo {
+    0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Donation Form */
+.donation-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+}
+
+.donation-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.donation-form input[type="text"],
+.donation-form input[type="number"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#donateButton {
+    background-color: gold;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#donateButton:hover {
+    background-color: darkgoldenrod;
+    transform: translateY(-2px);
+}
+
+.total-donations {
+    margin-top: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+/* Donors List */
+.donors-list {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+}
+
+#donorsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#donorsTable th, #donorsTable td {
+    border: 1px solid #eee;
+    padding: 10px;
+    text-align: left;
+}
+
+#donorsTable th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Modal for Certificate */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 700px;
+    border-radius: 10px;
+    position: relative;
+    text-align: center;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#certificateCanvas {
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    background-color: #fff;
+}
+
+.certificate-actions button {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 5px;
+    font-size: 1em;
+}
+
+.certificate-actions button:hover {
+    opacity: 0.8;
+}
+
+footer {
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #f2f2f2;
+    color: #555;
+    font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-text {
+        font-size: 1.2em;
+    }
+    .image-wrapper {
+        width: 100%;
+        height: auto;
+    }
+    .activity-images {
+        flex-direction: column;
+        align-items: center;
+    }
+    .donation-form, .donors-list {
+        padding: 15px;
+    }
+    #donorsTable {
+        font-size: 0.9em;
+    }
+    #donorsTable th, #donorsTable td {
+        padding: 8px;
+    }
+}
+
+.certificate-actions button {
+    background-color: #4CAF50; /* Green - for Download/Print */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 5px;
+    font-size: 1em;
+    transition: opacity 0.3s ease;
+}
+
+.certificate-actions button:hover {
+    opacity: 0.8;
+}
+
+/* สไตล์สำหรับปุ่ม LINE */
+#sendSlipLine {
+    background-color: #06C755; /* LINE Green */
+    color: white;
+    font-weight: bold;
+}
+
+#sendSlipLine:hover {
+    background-color: #05a847; /* Darker LINE Green on hover */
+}
