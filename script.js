@@ -22,6 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJ9Lph3QjJjx1KJA9l4SJdHKdxHM0JV-J9uHas9bMGgzSNiR1odQgqaZqeKEMiuynX/exec'; 
 
     // 2. ฟังก์ชันช่วยงาน (Helper Functions)
+    // ฟังก์ชันสำหรับจัดรูปแบบวันที่ให้เป็น "วัน เดือน ปี" ภาษาไทย
+    function formatThaiDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        // เพิ่ม 543 เพื่อแปลงเป็นพุทธศักราช
+        return `${date.getDate()} ${new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(date)} ${date.getFullYear() + 543}`;
+    }
+
     function updateTotalAmount() {
         const total = donations.reduce((sum, d) => sum + d.amount, 0);
         totalAmountSpan.textContent = total.toLocaleString(); // แสดงผลตัวเลขแบบมีคอมม่า
@@ -36,9 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // เรียงข้อมูลบริจาคจากล่าสุดไปเก่าสุด
         const sortedDonations = [...donations].sort((a, b) => {
-            // ปรับการแปลงวันที่ให้ถูกต้อง เพื่อการเรียงลำดับ
-            const dateA = new Date(a.date.replace(/(\d+)\s(\S+)\s(\d+)/, '$2 $1, $3').replace('กรกฎาคม', 'July').replace('มิถุนายน', 'June').replace('พฤษภาคม', 'May').replace('เมษายน', 'April').replace('มีนาคม', 'March').replace('กุมภาพันธ์', 'February').replace('มกราคม', 'January').replace('ธันวาคม', 'December').replace('พฤศจิกายน', 'November').replace('ตุลาคม', 'October').replace('กันยายน', 'September').replace('สิงหาคม', 'August'));
-            const dateB = new Date(b.date.replace(/(\d+)\s(\S+)\s(\d+)/, '$2 $1, $3').replace('กรกฎาคม', 'July').replace('มิถุนายน', 'June').replace('พฤษภาคม', 'May').replace('เมษายน', 'April').replace('มีนาคม', 'March').replace('กุมภาพันธ์', 'February').replace('มกราคม', 'January').replace('ธันวาคม', 'December').replace('พฤศจิกายน', 'November').replace('ตุลาคม', 'October').replace('กันยายน', 'September').replace('สิงหาคม', 'August'));
+            // สร้าง Date object สำหรับการเรียงลำดับ (ใช้ค่าจาก Apps Script โดยตรงเพื่อความแม่นยำ)
+            const dateA = new Date(a.originalDateString); // ใช้ค่า originalDateString ที่เก็บไว้
+            const dateB = new Date(b.originalDateString); // ใช้ค่า originalDateString ที่เก็บไว้
             return dateB - dateA;
         });
         
@@ -48,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell(1).textContent = d.name; // ชื่อ-นามสกุล
             row.insertCell(2).textContent = d.province; // จังหวัด
             row.insertCell(3).textContent = d.amount.toLocaleString(); // จำนวนเงิน
-            row.insertCell(4).textContent = d.date; // วันที่บริจาค
+            row.insertCell(4).textContent = d.date; // วันที่ (ที่จัดรูปแบบแล้ว)
         });
 
         dataTable = $('#donorsTable').DataTable({
@@ -62,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ฟังก์ชันสำหรับวาดเกียรติบัตรบน Canvas
-    function drawCertificate(name, amount, date) {
+    function drawCertificate(name, amount, date) { // date ที่ส่งมาที่นี่ควรจะเป็นรูปแบบไทยแล้ว
         const ctx = certificateCanvas.getContext('2d');
         certificateCanvas.width = 800; // ขนาด Canvas ที่เหมาะสม (อัตราส่วน A4)
         certificateCanvas.height = 565;
@@ -127,24 +135,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result && result.data) {
                 // *** สำคัญ: ปรับการแมปข้อมูลตรงนี้ ให้ตรงกับชื่อคอลัมน์ใน Google Sheet ของคุณ ***
-                // ถ้าคุณใช้ชื่อคอลัมน์ใน Google Sheet เป็นภาษาอังกฤษ (FullName, Province, Amount, Date)
-                donations = result.data.map(item => ({
-                    name: item.FullName,  // ตรงกับ FullName ใน Sheet
-                    province: item.Province, // ตรงกับ Province ใน Sheet
-                    amount: parseInt(item.Amount), // แปลงเป็นตัวเลข
-                    date: item.Date        // ตรงกับ Date ใน Sheet
-                }));
+                donations = result.data.map(item => {
+                    const originalDateString = item.Date; // เก็บ String วันที่เดิมไว้สำหรับเรียงลำดับ
+                    const formattedDate = formatThaiDate(originalDateString); // จัดรูปแบบวันที่ไทย
 
-                // ถ้าคุณใช้ชื่อคอลัมน์ใน Google Sheet เป็นภาษาไทย (เช่น 'ชื่อ - นามสกุล', 'จังหวัด', 'จำนวนเงินบริจาค', 'วันที่บริจาค')
-                // ให้ใช้โค้ดนี้แทนโค้ดด้านบน แล้วคอมเมนต์โค้ดด้านบน
-                /*
-                donations = result.data.map(item => ({
-                    name: item.ชื่อนามสกุล,  // 'ชื่อ - นามสกุล' ถูก Apps Script แปลงเป็น 'ชื่อนามสกุล'
-                    province: item.จังหวัด,   // 'จังหวัด' ถูก Apps Script แปลงเป็น 'จังหวัด'
-                    amount: parseInt(item.จำนวนเงินบริจาค), // 'จำนวนเงินบริจาค' ถูก Apps Script แปลงเป็น 'จำนวนเงินบริจาค'
-                    date: item.วันที่บริจาค   // 'วันที่บริจาค' ถูก Apps Script แปลงเป็น 'วันที่บริจาค'
-                }));
-                */
+                    // ถ้าคุณใช้ชื่อคอลัมน์ใน Google Sheet เป็นภาษาอังกฤษ (FullName, Province, Amount, Date)
+                    return {
+                        name: item.FullName,
+                        province: item.Province,
+                        amount: parseInt(item.Amount),
+                        date: formattedDate, // ใช้รูปแบบวันที่ไทยสำหรับแสดงผล
+                        originalDateString: originalDateString // เก็บ String วันที่เดิมสำหรับเรียงลำดับ
+                    };
+
+                    // ถ้าคุณใช้ชื่อคอลัมน์ใน Google Sheet เป็นภาษาไทย (เช่น 'ชื่อ - นามสกุล', 'จังหวัด', 'จำนวนเงินบริจาค', 'วันที่บริจาค')
+                    // ให้ใช้โค้ดนี้แทนโค้ดด้านบน แล้วคอมเมนต์โค้ดด้านบน
+                    /*
+                    return {
+                        name: item.ชื่อนามสกุล,
+                        province: item.จังหวัด,
+                        amount: parseInt(item.จำนวนเงินบริจาค),
+                        date: formattedDate, // ใช้รูปแบบวันที่ไทยสำหรับแสดงผล
+                        originalDateString: originalDateString // เก็บ String วันที่เดิมสำหรับเรียงลำดับ
+                    };
+                    */
+                });
 
                 updateTotalAmount();
                 renderDonorsTable();
@@ -188,20 +203,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const today = new Date();
-        const formattedDate = `${today.getDate()} ${new Intl.DateTimeFormat('th-TH', { month: 'long', year: 'numeric' }).format(today)}`;
+        // dateFromForm สำหรับส่งไป Apps Script (เป็นรูปแบบที่ Apps Script เข้าใจ)
+        // formattedDate สำหรับแสดงในเกียรติบัตร (เป็นรูปแบบไทย)
+        const dateFromForm = today.toISOString(); // ใช้ ISOString เพื่อส่งไป Apps Script
+        const formattedDate = formatThaiDate(today.toISOString()); // ใช้ฟังก์ชัน formatThaiDate
 
         const newDonation = { // ข้อมูลสำหรับแสดงผลในตารางชั่วคราวบนเว็บทันที (อาจจะไม่ใช้แล้วถ้าโหลดจาก Sheet ตลอด)
             name: fullName,
             province: province,
             amount: amount,
-            date: formattedDate
+            date: formattedDate, // ใช้รูปแบบวันที่ไทย
+            originalDateString: dateFromForm // เก็บ String วันที่เดิมไว้สำหรับเรียงลำดับ
         };
 
         const formData = new FormData(); // ข้อมูลสำหรับส่งไป Google Sheet
-        formData.append('FullName', fullName); // ชื่อคอลัมน์ใน Sheet (ตรงกับที่ตั้งใน Google Sheet)
+        formData.append('FullName', fullName); 
         formData.append('Province', province);
         formData.append('Amount', amount);
-        formData.append('Date', formattedDate);
+        formData.append('Date', dateFromForm); // ส่งวันที่ในรูปแบบ ISO 8601 ไป Apps Script
 
         try {
             Swal.fire({
@@ -269,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // เมื่อกดปุ่ม "ดาวน์โหลด PNG"
     downloadPngBtn.addEventListener('click', () => {
         const dataURL = certificateCanvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -280,8 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(link);
     });
 
-    // เมื่อกดปุ่ม "ดาวน์โหลด PDF" (ยังไม่สมบูรณ์)
-    downloadPdfBtn.addEventListener('click', async () => { // เปลี่ยนเป็น async เพื่อรอรูปภาพโหลด
+    downloadPdfBtn.addEventListener('click', async () => {
         Swal.fire({
             title: 'กำลังสร้าง PDF...',
             text: 'กรุณารอสักครู่',
@@ -291,23 +308,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const dataURL = certificateCanvas.toDataURL('image/png'); // ได้ base64 ของรูปภาพจาก canvas
+        const dataURL = certificateCanvas.toDataURL('image/png');
 
-        // สร้าง Object Image เพื่อให้ jsPDF ใช้งานได้
         const img = new Image();
         img.src = dataURL;
 
         img.onload = () => {
-            const { jsPDF } = window.jspdf; // เรียกใช้ jsPDF
-            const doc = new jsPDF('landscape', 'px', 'a4'); // กำหนดขนาด A4 แนวนอน
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape', 'px', 'a4');
 
             const imgWidth = doc.internal.pageSize.getWidth();
-            const imgHeight = (img.height * imgWidth) / img.width; // คำนวณความสูงให้ได้อัตราส่วนเดิม
+            const imgHeight = (img.height * imgWidth) / img.width;
 
-            doc.addImage(img, 'PNG', 0, 0, imgWidth, imgHeight); // เพิ่มรูปภาพลงใน PDF
-            doc.save('เกียรติบัตร_ร่วมทำบุญ.pdf'); // ดาวน์โหลดไฟล์ PDF
+            doc.addImage(img, 'PNG', 0, 0, imgWidth, imgHeight);
+            doc.save('เกียรติบัตร_ร่วมทำบุญ.pdf');
 
-            Swal.close(); // ปิด Loading Spinner
+            Swal.close();
         };
 
         img.onerror = (error) => {
@@ -321,10 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     });
 
-    // เมื่อกดปุ่ม "พิมพ์"
     printCertBtn.addEventListener('click', () => {
         const dataURL = certificateCanvas.toDataURL('image/png');
-        const printWindow = window.open('', '_blank', 'width=800,height=600'); // เปิดหน้าต่างใหม่สำหรับพิมพ์
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
         printWindow.document.write('<html><head><title>พิมพ์เกียรติบัตร</title></head><body>');
         printWindow.document.write('<img src="' + dataURL + '" style="max-width:100%; display: block; margin: 0 auto;">');
         printWindow.document.write('</body></html>');
@@ -334,14 +349,13 @@ document.addEventListener('DOMContentLoaded', () => {
         printWindow.close();
     });
 
-    // เมื่อกดปุ่ม "ส่งสลิปผ่าน LINE"
     sendSlipLineBtn.addEventListener('click', () => {
-        const lineLink = 'https://line.me/R/ti/g/QARgVer8XQ'; // ลิงก์ LINE Group
-        window.open(lineLink, '_blank'); // เปิดในแท็บใหม่
-        certificateModal.style.display = 'none'; // ปิด Modal เกียรติบัตร
+        const lineLink = 'https://line.me/R/ti/g/QARgVer8XQ';
+        window.open(lineLink, '_blank');
+        certificateModal.style.display = 'none';
     });
 
-    // 4. การจัดการข้อมูลจังหวัด (ยังคงเหมือนเดิม)
+    // 4. การจัดการข้อมูลจังหวัด
     const provinces = [
         "กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร", "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท",
         "ชัยภูมิ", "ชุมพร", "เชียงราย", "เชียงใหม่", "ตรัง", "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม", "นครราชสีมา",
